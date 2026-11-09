@@ -2432,6 +2432,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "Darstellung im eingeklappten Zustand",
+      "compactModeHint": "Auf MacBooks mit physischer Notch bleibt die eingeklappte Kapsel im Modus „Ausgeblendet“ in der Notch verborgen, bis Sie den Mauszeiger darüber bewegen. Andere Bildschirme verwenden das Standardlayout.",
+      "compactModeStandard": "Standard (Status und Kontingent anzeigen)",
+      "compactModeHidden": "Ausgeblendet (bei Hover aufklappen)",
+      "compactModeFailed": "Darstellungsmodus konnte nicht gespeichert werden. Bitte erneut versuchen.",
       "title": "Dynamic Island",
       "unsupported": "Agent Notch erfordert macOS 14 oder neuer.",
       "subtleRemindersLabel": "Dezente Hinweise",
