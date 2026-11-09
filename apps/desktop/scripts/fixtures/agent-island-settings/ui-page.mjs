@@ -7,8 +7,16 @@ export default {
   cases: {
     default: { about: 'Existing automatic cards remain the default' },
     subtle: { about: 'Subtle reminders enabled' },
+    hidden: { about: 'Hardware notch compact appearance set to Hidden' },
   },
   async check(page, ui) {
+    const compactMode = page.getByRole('combobox', { name: await ui.t('settings.agentIsland.compactModeLabel') });
+    await compactMode.selectOption('hidden');
+    await page.waitForFunction(() => localStorage.getItem('notifications.agentIslandCompactDisplayMode') === 'hidden');
+    await ui.capture('compact-hidden');
+    await compactMode.selectOption('standard');
+    await page.waitForFunction(() => localStorage.getItem('notifications.agentIslandCompactDisplayMode') === 'standard');
+    await ui.capture('compact-standard');
     const toggle = page.getByRole('switch', { name: await ui.t('settings.agentIsland.subtleRemindersLabel'), exact: true });
     const before = await toggle.getAttribute('aria-checked');
     await toggle.click();
