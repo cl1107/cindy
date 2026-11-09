@@ -7021,6 +7021,34 @@ describe('AgentIslandService native publishing', () => {
     expect(framesById.get(2)).toMatchObject({
       contentWidth: 250,
     });
+
+    // Hidden mode applies only to the centered physical notch and never rewrites
+    // the saved width preference. Standard recovers the previous 500pt width.
+    const setCompactMode = (mode: 'hidden' | 'standard') => {
+      const impl = service as unknown as {
+        compactDisplayMode: 'hidden' | 'standard';
+        publish: () => void;
+      };
+      impl.compactDisplayMode = mode;
+      impl.publish();
+    };
+    setCompactMode('hidden');
+    framesById = new Map(latestNativeFrames(publish).map((frame) => [frame.displayId, frame]));
+    expect(framesById.get(2)?.contentWidth).toBe(180);
+    expect(publish.mock.lastCall?.[0]?.compactDisplayMode).toBe('hidden');
+
+    setLayoutPreference({ displayId: 2, compactContentWidth: 500 });
+    framesById = new Map(latestNativeFrames(publish).map((frame) => [frame.displayId, frame]));
+    expect(framesById.get(2)?.contentWidth).toBe(180);
+
+    setCompactMode('standard');
+    framesById = new Map(latestNativeFrames(publish).map((frame) => [frame.displayId, frame]));
+    expect(framesById.get(2)?.contentWidth).toBe(500);
+
+    setCompactMode('hidden');
+    setLayoutPreference({ displayId: 2, centerXRatio: 0.25 });
+    framesById = new Map(latestNativeFrames(publish).map((frame) => [frame.displayId, frame]));
+    expect(framesById.get(2)?.contentWidth).toBe(500);
   });
 });
 
