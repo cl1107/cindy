@@ -51,6 +51,21 @@ export const agentIslandSettings = defineSettings({
     sectionKey: 'settings.tabs.agentIsland',
     descriptionKey: 'settings.agentIsland.subtleRemindersHint',
   },
+  compactModeLabel: {
+    isVisible: areIslandControlsVisible,
+    id: 'settings.agentIsland.compactModeLabel',
+    fallbackTargetId: 'settings-panel-agent-island',
+    tab: 'agent-island',
+    targetId: 'settings-search-settings-agentIsland-compactModeLabel',
+    titleKey: 'settings.agentIsland.compactModeLabel',
+    sectionKey: 'settings.tabs.agentIsland',
+    descriptionKey: 'settings.agentIsland.compactModeHint',
+    options: [
+      { value: 'standard', labelKey: 'settings.agentIsland.compactModeStandard' },
+      { value: 'hidden', labelKey: 'settings.agentIsland.compactModeHidden' },
+    ],
+    aliases: ['刘海隐藏', '收起显示', 'notch hidden', 'compact mode'],
+  },
   displayLabel: {
     isVisible: areIslandControlsVisible,
     id: 'settings.agentIsland.displayLabel',
