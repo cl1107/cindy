@@ -2402,6 +2402,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "收起状态显示",
+      "compactModeHint": "在带物理刘海的 MacBook 上，完全隐藏模式会将收起的任务胶囊藏入刘海，仅在悬停时展开；其他显示器仍使用标准布局。",
+      "compactModeStandard": "标准模式（常显状态和额度）",
+      "compactModeHidden": "完全隐藏（悬停展开）",
+      "compactModeFailed": "无法保存显示模式，请重试。",
       "title": "灵动岛",
       "unsupported": "任务胶囊需要 macOS 14 或更高版本。",
       "subtleRemindersLabel": "轻提醒",
