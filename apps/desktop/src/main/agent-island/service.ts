@@ -41,6 +41,7 @@ import {
   AGENT_ISLAND_SET_LIVE_ACTIVITY_CHANNEL,
   AGENT_ISLAND_GET_LIVE_ACTIVITY_SUPPORT_CHANNEL,
   AGENT_ISLAND_SET_SUBTLE_REMINDERS_CHANNEL,
+  AGENT_ISLAND_SET_COMPACT_DISPLAY_MODE_CHANNEL,
   AGENT_ISLAND_SET_REMOTE_SESSIONS_CHANNEL,
   AGENT_ISLAND_SET_COMPANION_CHATS_CHANNEL,
   AGENT_ISLAND_READ_COMPANION_CHAT_CHANNEL,
@@ -51,6 +52,9 @@ import {
   AGENT_ISLAND_SELECT_SOUND_FILE_CHANNEL,
   DEFAULT_AGENT_ISLAND_DISPLAY_TARGET,
   DEFAULT_AGENT_ISLAND_MASCOT_SKIN,
+  DEFAULT_AGENT_ISLAND_COMPACT_DISPLAY_MODE,
+  isAgentIslandCompactDisplayMode,
+  type AgentIslandCompactDisplayMode,
   cloneAgentIslandDisplayTarget,
   cloneAgentIslandSoundSettings,
   createDefaultAgentIslandDisplayConfig,
@@ -438,6 +442,7 @@ export class AgentIslandService {
   private nativePreferredDisplayId: number | null = null;
   private soundSettings: AgentIslandSoundSettings = createDefaultAgentIslandDisplayConfig().soundSettings;
   private mascotSkin: AgentIslandMascotSkin = DEFAULT_AGENT_ISLAND_MASCOT_SKIN;
+  private compactDisplayMode: AgentIslandCompactDisplayMode = DEFAULT_AGENT_ISLAND_COMPACT_DISPLAY_MODE;
   private quota: AgentIslandQuotaItem[] = [];
   private readonly enabledListeners = new Set<(enabled: boolean) => void>();
   private displayTarget: AgentIslandDisplayTarget = DEFAULT_AGENT_ISLAND_DISPLAY_TARGET;
@@ -724,6 +729,16 @@ export class AgentIslandService {
         throwIpcError('INVALID_PARAMS', 'enabled must be boolean');
       }
       this.state.subtleReminders = enabled;
+      this.publish();
+      return { ok: true };
+    });
+
+    ipcMain.handle(AGENT_ISLAND_SET_COMPACT_DISPLAY_MODE_CHANNEL, (event, rawMode: unknown) => {
+      assertTrustedAppRendererEvent(event);
+      if (!isAgentIslandCompactDisplayMode(rawMode)) {
+        throwIpcError('INVALID_PARAMS', 'compact display mode is invalid');
+      }
+      this.compactDisplayMode = rawMode;
       this.publish();
       return { ok: true };
     });
@@ -2242,12 +2257,12 @@ export class AgentIslandService {
     // Sounds follow real runtime transitions. Chat read/visibility filters only own
     // the rendered unread projection and must neither mute a fresh turn nor replay history.
     const soundDisplayState = withAgentIslandConfig(
-      buildAgentIslandDisplayState(this.state, now), this.soundSettings, this.mascotSkin, this.quota,
+      buildAgentIslandDisplayState(this.state, now), this.soundSettings, this.mascotSkin, this.quota, this.compactDisplayMode,
     );
     const chatDisplayState = this.companionChats.size > 0
       ? withAgentIslandConfig(
         buildAgentIslandDisplayState(this.state, now, this.companionChatProjections()),
-        this.soundSettings, this.mascotSkin, this.quota,
+        this.soundSettings, this.mascotSkin, this.quota, this.compactDisplayMode,
       )
       : soundDisplayState;
     // The system Live Activity works whether or not our own island is shown.
@@ -2386,7 +2401,7 @@ export class AgentIslandService {
     const displayState = withAgentIslandConfig(buildHiddenAgentIslandDisplayState({
       now,
       appFocused: this.state.appFocused,
-    }), this.soundSettings, this.mascotSkin);
+    }), this.soundSettings, this.mascotSkin, [], this.compactDisplayMode);
     const update = this.computeNativeDisplayUpdate(displayState);
     if (!this.nativeHost.publish(
       displayState,
@@ -2625,6 +2640,11 @@ export class AgentIslandService {
       layoutPreference,
       screenMetrics: this.getScreenLayoutMetrics(display),
     });
+    // Only the hardware-notch compact presentation is hidden. Do not alter the
+    // stored width, which must return unchanged when Standard is selected again.
+    if (!expanded && screenMetrics?.hasNotch && this.compactDisplayMode === 'hidden') {
+      return Math.max(1, screenMetrics.notchWidth);
+    }
     const rawPreferredContentWidth = expanded
       ? layoutPreference.expandedContentWidth
       : layoutPreference.compactContentWidth;
@@ -3225,9 +3245,11 @@ function withAgentIslandConfig(
   soundSettings: AgentIslandSoundSettings,
   mascotSkin: AgentIslandMascotSkin,
   quota: readonly AgentIslandQuotaItem[] = [],
+  compactDisplayMode: AgentIslandCompactDisplayMode = DEFAULT_AGENT_ISLAND_COMPACT_DISPLAY_MODE,
 ): AgentIslandDisplayState {
   return {
     ...displayState,
+    compactDisplayMode,
     ...(quota.length > 0 ? { quota: [...quota] } : {}),
     strings: buildAgentIslandStrings(),
     soundSettings: cloneAgentIslandSoundSettings(soundSettings),
