@@ -11,6 +11,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_AGENT_ISLAND_DISPLAY_TARGET,
   DEFAULT_AGENT_ISLAND_LIVE_ACTIVITY,
+  DEFAULT_AGENT_ISLAND_COMPACT_DISPLAY_MODE,
+  isAgentIslandCompactDisplayMode,
+  type AgentIslandCompactDisplayMode,
   DEFAULT_AGENT_ISLAND_MASCOT_SKIN,
   DEFAULT_AGENT_ISLAND_SOUND_SETTINGS,
   cloneAgentIslandDisplayTarget,
@@ -33,6 +36,7 @@ const SOUND_STORAGE_KEY = 'notifications.agentIslandSoundSettings';
 const MASCOT_SKIN_STORAGE_KEY = 'notifications.agentIslandMascotSkin';
 const DISPLAY_TARGET_STORAGE_KEY = 'notifications.agentIslandDisplayTarget';
 const SUBTLE_REMINDERS_STORAGE_KEY = 'notifications.agentIslandSubtleReminders';
+const COMPACT_DISPLAY_MODE_STORAGE_KEY = 'notifications.agentIslandCompactDisplayMode';
 /** Present only when the user overrode the default (on). */
 const LIVE_ACTIVITY_STORAGE_KEY = 'notifications.agentIslandLiveActivity';
 const DEFAULT_ENABLED = false;
@@ -96,6 +100,42 @@ export function getAgentIslandEnabled(): boolean {
     // localStorage 不可用——退回默认。
   }
   return DEFAULT_ENABLED;
+}
+
+export function getAgentIslandCompactDisplayMode(): AgentIslandCompactDisplayMode {
+  try {
+    const raw = localStorage.getItem(COMPACT_DISPLAY_MODE_STORAGE_KEY);
+    if (isAgentIslandCompactDisplayMode(raw)) return raw;
+  } catch {
+    // Storage unavailable: preserve the existing Standard presentation.
+  }
+  return DEFAULT_AGENT_ISLAND_COMPACT_DISPLAY_MODE;
+}
+
+async function applyAgentIslandCompactDisplayModeToMain(mode: AgentIslandCompactDisplayMode): Promise<boolean> {
+  if (!isAgentIslandSupported()) return false;
+  const apply = window.electronAPI?.agentIsland?.setCompactDisplayMode;
+  if (typeof apply !== 'function') return false;
+  try {
+    await apply(mode);
+    return true;
+  } catch (err) {
+    log.warn('agent island setCompactDisplayMode failed', err);
+    return false;
+  }
+}
+
+export async function setAgentIslandCompactDisplayMode(mode: AgentIslandCompactDisplayMode): Promise<boolean> {
+  const previous = getAgentIslandCompactDisplayMode();
+  if (!await applyAgentIslandCompactDisplayModeToMain(mode)) return false;
+  try {
+    localStorage.setItem(COMPACT_DISPLAY_MODE_STORAGE_KEY, mode);
+  } catch {
+    await applyAgentIslandCompactDisplayModeToMain(previous);
+    return false;
+  }
+  notifySubscribers();
+  return true;
 }
 
 export function getAgentIslandSubtleReminders(): boolean {
@@ -387,6 +427,7 @@ export function syncAgentIslandEnabledToMain(): void {
   void (async () => {
     await Promise.all([
       applyAgentIslandSubtleRemindersToMain(getAgentIslandSubtleReminders()),
+      applyAgentIslandCompactDisplayModeToMain(getAgentIslandCompactDisplayMode()),
       applyAgentIslandLiveActivityToMain(getAgentIslandLiveActivity()),
       applyAgentIslandSoundSettingsToMain(getAgentIslandSoundSettings()),
       applyAgentIslandMascotSkinToMain(getAgentIslandMascotSkin()),
@@ -496,6 +537,8 @@ export function previewAgentIslandSound(sound: AgentIslandSoundChoice): void {
 export function useAgentIslandSettings(): {
   enabled: boolean;
   setEnabled: (next: boolean) => void;
+  compactDisplayMode: AgentIslandCompactDisplayMode;
+  setCompactDisplayMode: (next: AgentIslandCompactDisplayMode) => Promise<boolean>;
   subtleReminders: boolean;
   subtleRemindersCustomized: boolean;
   setSubtleReminders: (next: boolean) => Promise<boolean>;
@@ -520,6 +563,7 @@ export function useAgentIslandSettings(): {
   supported: boolean;
 } {
   const [enabled, setEnabledState] = useState<boolean>(getAgentIslandEnabled);
+  const [compactDisplayMode, setCompactDisplayModeState] = useState(getAgentIslandCompactDisplayMode);
   const [subtleReminders, setSubtleRemindersState] = useState(getAgentIslandSubtleReminders);
   const [subtleRemindersCustomized, setSubtleRemindersCustomizedState] = useState(isAgentIslandSubtleRemindersCustomized);
   const [liveActivity, setLiveActivityState] = useState(getAgentIslandLiveActivity);
@@ -626,6 +670,7 @@ export function useAgentIslandSettings(): {
   useEffect(() => {
     const onChange = () => {
       setEnabledState(getAgentIslandEnabled());
+      setCompactDisplayModeState(getAgentIslandCompactDisplayMode());
       setSubtleRemindersState(getAgentIslandSubtleReminders());
       setSubtleRemindersCustomizedState(isAgentIslandSubtleRemindersCustomized());
       setLiveActivityState(getAgentIslandLiveActivity());
@@ -641,6 +686,8 @@ export function useAgentIslandSettings(): {
   return {
     enabled,
     setEnabled,
+    compactDisplayMode,
+    setCompactDisplayMode: setAgentIslandCompactDisplayMode,
     subtleReminders,
     subtleRemindersCustomized,
     setSubtleReminders: setAgentIslandSubtleReminders,
