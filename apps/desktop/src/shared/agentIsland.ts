@@ -90,6 +90,12 @@ export interface AgentIslandSessionActivity
 }
 
 export type AgentIslandDisplayMode = 'compact' | 'expanded';
+/** Visual behavior of the collapsed island on a hardware-notch MacBook. */
+export type AgentIslandCompactDisplayMode = 'hidden' | 'standard';
+export const DEFAULT_AGENT_ISLAND_COMPACT_DISPLAY_MODE: AgentIslandCompactDisplayMode = 'standard';
+export function isAgentIslandCompactDisplayMode(value: unknown): value is AgentIslandCompactDisplayMode {
+  return value === 'hidden' || value === 'standard';
+}
 export type AgentIslandNotchStatus = 'closed' | 'peek' | 'expanded';
 export type AgentIslandDisplayPolicy = 'closed' | 'peek' | 'blocking' | 'transient' | 'manualExpanded';
 export type AgentIslandDisplaySurface = 'collapsed' | 'sessionList' | 'interactionCard' | 'completionCard';
@@ -828,6 +834,8 @@ export interface AgentIslandDisplayState {
   sessions: AgentIslandSessionSnapshot[];
   totalCount: number;
   measuredContentHeight: number;
+  /** Keep the native collapsed surface inside the physical notch when hidden. */
+  compactDisplayMode?: AgentIslandCompactDisplayMode;
   /** Local presentation only; absent on older hosts. Never relayed as task activity. */
   compactReminder?: { phase: AgentIslandSessionPhase; until: number };
   /** Remaining quota in the menu bar's order; absent or empty when there is none to show. */
@@ -903,6 +911,7 @@ export const AGENT_ISLAND_SET_LIVE_ACTIVITY_CHANNEL = 'agent-island:set-live-act
 export const AGENT_ISLAND_GET_LIVE_ACTIVITY_SUPPORT_CHANNEL = 'agent-island:get-live-activity-support';
 export const DEFAULT_AGENT_ISLAND_LIVE_ACTIVITY = true;
 export const AGENT_ISLAND_SET_SUBTLE_REMINDERS_CHANNEL = 'agent-island:set-subtle-reminders';
+export const AGENT_ISLAND_SET_COMPACT_DISPLAY_MODE_CHANNEL = 'agent-island:set-compact-display-mode';
 export const AGENT_ISLAND_SET_DISPLAY_TARGET_CHANNEL = 'agent-island:set-display-target';
 export const AGENT_ISLAND_GET_DISPLAY_OPTIONS_CHANNEL = 'agent-island:get-display-options';
 export const AGENT_ISLAND_PREVIEW_SOUND_CHANNEL = 'agent-island:preview-sound';
