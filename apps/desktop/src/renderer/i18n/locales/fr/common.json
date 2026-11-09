@@ -2470,6 +2470,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "Affichage réduit",
+      "compactModeHint": "Sur les MacBook dotés d’une encoche physique, le mode Masqué dissimule la capsule repliée dans l’encoche jusqu’au survol. Les autres écrans gardent la disposition standard.",
+      "compactModeStandard": "Standard (état et quota visibles)",
+      "compactModeHidden": "Masqué (déployer au survol)",
+      "compactModeFailed": "Impossible d’enregistrer le mode d’affichage. Réessayez.",
       "title": "Dynamic Island",
       "unsupported": "Agent Notch nécessite macOS 14 ou une version ultérieure.",
       "subtleRemindersLabel": "Alertes discrètes",
