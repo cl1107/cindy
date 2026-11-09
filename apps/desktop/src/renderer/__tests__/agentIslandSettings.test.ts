@@ -9,6 +9,8 @@ import {
 } from '../../shared/agentIsland';
 import {
   getAgentIslandDisplayTarget,
+  getAgentIslandCompactDisplayMode,
+  setAgentIslandCompactDisplayMode,
   getAgentIslandEnabled,
   getAgentIslandSubtleReminders,
   setAgentIslandSubtleReminders,
@@ -48,6 +50,49 @@ describe('agent island settings', () => {
     localStorage.clear();
     Reflect.deleteProperty(window, 'electronAPI');
     vi.restoreAllMocks();
+  });
+
+  it('defaults to Standard and persists Hidden before enabling the native island', async () => {
+    const setCompactDisplayMode = vi.fn(async () => ({ ok: true as const }));
+    const setEnabled = vi.fn(async () => ({ ok: true as const }));
+    installElectronApi({ setCompactDisplayMode, setEnabled });
+
+    expect(getAgentIslandCompactDisplayMode()).toBe('standard');
+    await expect(setAgentIslandCompactDisplayMode('hidden')).resolves.toBe(true);
+    expect(localStorage.getItem('notifications.agentIslandCompactDisplayMode')).toBe('hidden');
+
+    syncAgentIslandEnabledToMain();
+    await vi.waitFor(() => expect(setEnabled).toHaveBeenCalled());
+    expect(setCompactDisplayMode).toHaveBeenLastCalledWith('hidden');
+    expect(setCompactDisplayMode.mock.invocationCallOrder.at(-1)).toBeLessThan(setEnabled.mock.invocationCallOrder[0]);
+
+    setCompactDisplayMode.mockRejectedValueOnce(new Error('unavailable'));
+    await expect(setAgentIslandCompactDisplayMode('standard')).resolves.toBe(false);
+    expect(getAgentIslandCompactDisplayMode()).toBe('hidden');
+  });
+
+  it('rejects unknown compact display modes and rolls back when persistence fails', async () => {
+    const setCompactDisplayMode = vi.fn(async () => ({ ok: true as const }));
+    installElectronApi({ setCompactDisplayMode });
+    localStorage.setItem('notifications.agentIslandCompactDisplayMode', 'unsupported');
+    expect(getAgentIslandCompactDisplayMode()).toBe('standard');
+
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => { throw new Error('storage unavailable'); });
+    await expect(setAgentIslandCompactDisplayMode('hidden')).resolves.toBe(false);
+    expect(getAgentIslandCompactDisplayMode()).toBe('standard');
+    expect(setCompactDisplayMode.mock.calls).toEqual([['hidden'], ['standard']]);
+  });
+
+  it('updates mounted settings when the compact appearance changes', async () => {
+    const setCompactDisplayMode = vi.fn(async () => ({ ok: true as const }));
+    installElectronApi({ setCompactDisplayMode });
+    const { result, unmount } = renderHook(() => useAgentIslandSettings());
+    expect(result.current.compactDisplayMode).toBe('standard');
+    await act(async () => {
+      await expect(result.current.setCompactDisplayMode('hidden')).resolves.toBe(true);
+    });
+    expect(result.current.compactDisplayMode).toBe('hidden');
+    unmount();
   });
 
   // Unit: new local preference; existing tests do not cover its persistence or
