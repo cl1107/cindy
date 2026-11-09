@@ -1490,6 +1490,7 @@ struct AgentIslandQuotaItem: Codable, Equatable, Identifiable {
 }
 
 struct AgentIslandDisplayState: Codable {
+  var compactDisplayMode: String? = nil
   var compactReminder: AgentIslandCompactReminder? = nil
   var quota: [AgentIslandQuotaItem]? = nil
   let visible: Bool
@@ -2097,6 +2098,8 @@ struct AgentIslandLayout: Equatable {
     let layoutScreenMetrics = hardwareNotchLayoutEnabled
       ? screenMetrics
       : screenMetrics.disablingHardwareNotchLayout()
+    let hiddenCompact = !expanded && layoutScreenMetrics.hasNotch
+      && state.compactDisplayMode == "hidden"
     // Only the compact hardware-notch layout reserves room for the badge; every other
     // layout tick skips the reservation entirely and passes 0.
     let compactBadgeWidth = !expanded && layoutScreenMetrics.hasNotch && hasSession
@@ -2113,12 +2116,17 @@ struct AgentIslandLayout: Equatable {
     // A hidden island reveals only enough room for its existing icon and count.
     // Wider user preferences stay unchanged, and the saved width is never rewritten.
     var width = baseWidth
-    if !expanded, state.compactReminder != nil {
+    if !expanded && !hiddenCompact, state.compactReminder != nil {
       let minimumReminderWidth = layoutScreenMetrics.hasNotch
         ? defaultCompactWidth(hasSession: true, screenMetrics: layoutScreenMetrics, compactBadgeWidth: compactBadgeWidth)
         : compactIslandStatusIconWidth + 14 + 22
           + PillBadge.intrinsicWidth(pillSnapshot: state.pillSnapshot, compact: true)
       width = min(max(baseWidth, minimumReminderWidth), max(1, availableFrameWidth - compactIslandCarrierInset * 2))
+    }
+    if hiddenCompact {
+      // Match the physical camera notch without altering the user's saved compact width.
+      // The existing tracking layer still recognizes hover across this invisible target.
+      width = min(max(1, CGFloat(layoutScreenMetrics.notchWidth)), max(1, availableFrameWidth - compactIslandCarrierInset * 2))
     }
     let height = computeHeight(state: state, expanded: expanded, notchBaselineHeight: notchBaselineHeight)
     let shape = shapeForStatus(notchStatus)
@@ -2129,11 +2137,11 @@ struct AgentIslandLayout: Equatable {
       height: height,
       carrierInset: expanded ? expandedIslandCarrierExpandedInset : compactIslandCarrierInset,
       menuBarZoneHeight: max(8, notchBaselineHeight),
-      topExtension: shape.topExtension,
+      topExtension: hiddenCompact ? 0 : shape.topExtension,
       bottomRadius: shape.bottomRadius,
       shadowRadius: shadow.radius,
       shadowY: shadow.y,
-      shadowOpacity: shadowVisible ? shadow.opacity : 0,
+      shadowOpacity: hiddenCompact ? 0 : (shadowVisible ? shadow.opacity : 0),
       expanded: expanded,
       hasHardwareNotch: layoutScreenMetrics.hasNotch,
       notchWidth: CGFloat(layoutScreenMetrics.notchWidth)
