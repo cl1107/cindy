@@ -2402,6 +2402,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "접힌 상태 표시",
+      "compactModeHint": "물리적 노치가 있는 MacBook에서는 숨김 모드가 접힌 작업 캡슐을 노치 안에 숨기고 마우스를 올리면 펼칩니다. 다른 화면은 기본 레이아웃을 유지합니다.",
+      "compactModeStandard": "표준 (상태 및 잔여량 항상 표시)",
+      "compactModeHidden": "완전히 숨김 (마우스를 올리면 펼침)",
+      "compactModeFailed": "표시 모드를 저장하지 못했습니다. 다시 시도하세요.",
       "title": "Dynamic Island",
       "unsupported": "Agent Notch를 사용하려면 macOS 14 이상이 필요합니다.",
       "subtleRemindersLabel": "은은한 알림",
