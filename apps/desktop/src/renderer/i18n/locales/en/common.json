@@ -2432,6 +2432,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "Collapsed appearance",
+      "compactModeHint": "On MacBooks with a physical notch, Hidden conceals the collapsed island inside the notch until you hover. Other screens keep the standard layout.",
+      "compactModeStandard": "Standard (show status and quota)",
+      "compactModeHidden": "Hidden (reveal on hover)",
+      "compactModeFailed": "Could not save appearance mode. Please try again.",
       "title": "Dynamic Island",
       "unsupported": "Agent Notch requires macOS 14 or later.",
       "subtleRemindersLabel": "Subtle reminders",
