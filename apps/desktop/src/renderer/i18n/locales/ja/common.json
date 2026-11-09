@@ -2402,6 +2402,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "折りたたみ時の表示",
+      "compactModeHint": "物理ノッチ付き MacBook では、非表示モードで折りたたんだ Agent Notch をノッチ内に隠し、ホバー時だけ展開します。他の画面は標準表示のままです。",
+      "compactModeStandard": "標準（状態と残量を常時表示）",
+      "compactModeHidden": "非表示（ホバーで展開）",
+      "compactModeFailed": "表示モードを保存できませんでした。もう一度お試しください。",
       "title": "Dynamic Island",
       "unsupported": "Agent Notch を利用するには macOS 14 以降が必要です。",
       "subtleRemindersLabel": "控えめな通知",
