@@ -2402,6 +2402,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "收敛之态",
+      "compactModeHint": "凡 MacBook 有实刘海者，选匿藏，则胶囊收敛于刘海之内，鼠悬其上乃展；余屏仍循旧制。",
+      "compactModeStandard": "常式（状态与额度恒显）",
+      "compactModeHidden": "匿藏（鼠悬乃展）",
+      "compactModeFailed": "显示之制未能存，请再试。",
       "title": "灵动岛",
       "unsupported": "任务胶囊须 macOS 14 或更高之版。",
       "subtleRemindersLabel": "轻提醒",
