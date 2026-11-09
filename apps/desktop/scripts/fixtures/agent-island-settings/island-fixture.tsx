@@ -4,6 +4,8 @@ import { AgentIslandSection } from '../../../src/renderer/components/settings/Ag
 mountPage({
   host: (ctx) => {
     localStorage.setItem('notifications.agentIslandEnabled', 'true');
+    if (ctx.case === 'hidden') localStorage.setItem('notifications.agentIslandCompactDisplayMode', 'hidden');
+    else localStorage.removeItem('notifications.agentIslandCompactDisplayMode');
     if (ctx.case === 'subtle') localStorage.setItem('notifications.agentIslandSubtleReminders', 'true');
     else localStorage.removeItem('notifications.agentIslandSubtleReminders');
     return {
@@ -11,6 +13,7 @@ mountPage({
       agentIsland: {
         setEnabled: async () => ({ ok: true }),
         setSubtleReminders: async () => ({ ok: true }),
+        setCompactDisplayMode: async () => ({ ok: true }),
         setSoundSettings: async () => ({ ok: true }),
         setMascotSkin: async () => ({ ok: true }),
         setDisplayTarget: async () => ({ ok: true }),
