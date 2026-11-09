@@ -2470,6 +2470,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "Aspeto recolhido",
+      "compactModeHint": "Nos MacBooks com entalhe físico, o modo Oculto mantém a cápsula recolhida dentro do entalhe até passar o cursor. Os outros ecrãs mantêm o esquema padrão.",
+      "compactModeStandard": "Padrão (mostrar estado e quota)",
+      "compactModeHidden": "Oculto (expandir ao passar o cursor)",
+      "compactModeFailed": "Não foi possível guardar o modo de apresentação. Tenta novamente.",
       "title": "Dynamic Island",
       "unsupported": "O Agent Notch requer o macOS 14 ou posterior.",
       "subtleRemindersLabel": "Avisos discretos",
