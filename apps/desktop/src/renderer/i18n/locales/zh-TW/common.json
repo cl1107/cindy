@@ -2402,6 +2402,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "收合狀態顯示",
+      "compactModeHint": "在配備實體瀏海的 MacBook 上，完全隱藏會將收合的任務膠囊藏入瀏海，滑鼠懸停才展開；其他顯示器維持標準版面。",
+      "compactModeStandard": "標準模式（常顯狀態與額度）",
+      "compactModeHidden": "完全隱藏（懸停展開）",
+      "compactModeFailed": "無法儲存顯示模式，請重試。",
       "title": "動態島",
       "unsupported": "任務膠囊需要 macOS 14 或更高版本。",
       "subtleRemindersLabel": "輕提醒",
