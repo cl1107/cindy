@@ -2470,6 +2470,11 @@
       }
     },
     "agentIsland": {
+      "compactModeLabel": "Aspecto contraído",
+      "compactModeHint": "En los MacBook con muesca física, el modo Oculto mantiene la cápsula contraída dentro de la muesca hasta que pases el cursor. Las otras pantallas conservan el diseño estándar.",
+      "compactModeStandard": "Estándar (mostrar estado y cuota)",
+      "compactModeHidden": "Oculto (expandir al pasar el cursor)",
+      "compactModeFailed": "No se pudo guardar el modo de visualización. Inténtalo de nuevo.",
       "title": "Dynamic Island",
       "unsupported": "La Agent Notch requiere macOS 14 o posterior.",
       "subtleRemindersLabel": "Avisos discretos",
