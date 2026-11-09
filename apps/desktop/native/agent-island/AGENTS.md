@@ -64,6 +64,25 @@ pnpm --filter desktop preview:island-mascots
    初值都正常。根因未查明，当前把 `zoom` 默认值取成首项 `1` 规避（1× 也正是我们想要的默认
    真实尺寸）。若以后要给这类档位设非首项默认值，先验证初值有没有被改写。
 
+## 收起状态显示模式
+
+renderer `useAgentIslandSettings` 将本机偏好 `notifications.agentIslandCompactDisplayMode`
+经 `agent-island:set-compact-display-mode` 送入 main；main 的 `AgentIslandService`
+以 `compactDisplayMode` 随每帧 `AgentIslandDisplayState` 下发 helper。
+只允许 `standard`（默认，旧行为）或 `hidden`。
+
+- **hidden 仅影响物理刘海、居中、收起态**：main 暂时将 native `contentWidth`
+  设为物理 `notchWidth`，helper 的 `AgentIslandLayout.compute` 同样强制
+  使用这个宽度，不为提醒、计数或额度增加宽度；原有
+  `hardwareNotchHidden` 分支隐藏内容，不画外侧阴影或形状延伸。
+- **偏好不被覆写**：不要把这个临时隐藏宽度写回 `compactContentWidth`；
+  切回 standard 后立即使用原来的自定义宽度。展开态也不受影响。
+- **Hover 行为不变**：`TrackingLayer` 保留刘海范围作为触发区域，
+  由现有状态机执行延迟 Hover 展开和移出收起。
+- **非刘海屏不强制隐藏**：包括外接显示器、没有物理刘海的 Mac，
+  以及用户把胶囊拖离物理刘海的布局，仍使用原有显示与拖动逻辑。
+- 本设置仅控制**收起态**；原有重要事件通知卡片自动展开策略独立于它。
+
 ## 余量芯片
 
 空闲灵动岛与展开后的顶栏会显示各套餐余量，数据来自菜单栏的余量概览
