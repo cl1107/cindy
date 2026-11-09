@@ -40,6 +40,7 @@ import {
   AGENT_ISLAND_SOUND_EVENTS,
   AGENT_ISLAND_SOUND_OPTIONS,
   type AgentIslandDisplayTarget,
+  type AgentIslandCompactDisplayMode,
   type AgentIslandMascotSkin,
   type AgentIslandSoundChoice,
   type AgentIslandSoundEvent,
@@ -168,6 +169,8 @@ export function AgentIslandSection() {
   const {
     enabled,
     setEnabled,
+    compactDisplayMode,
+    setCompactDisplayMode,
     subtleReminders,
     subtleRemindersCustomized,
     setSubtleReminders,
@@ -201,6 +204,15 @@ export function AgentIslandSection() {
     if (searchEntry?.id === agentIslandSettings.skinLabel.id) setSkinsOpen(true);
   }, [searchEntry, searchActivation]);
   const [soundResetPending, setSoundResetPending] = useState(false);
+  const [compactModePending, setCompactModePending] = useState(false);
+  const handleCompactDisplayModeChange = async (next: AgentIslandCompactDisplayMode) => {
+    setCompactModePending(true);
+    try {
+      if (!await setCompactDisplayMode(next)) toast.error(t('settings.agentIsland.compactModeFailed'));
+    } finally {
+      setCompactModePending(false);
+    }
+  };
   const [subtleRemindersPending, setSubtleRemindersPending] = useState(false);
   const handleSubtleRemindersChange = async (next: boolean) => {
     setSubtleRemindersPending(true);
@@ -319,6 +331,33 @@ export function AgentIslandSection() {
           />
           {enabled && (
             <>
+              <SettingsField
+                title={<span id={agentIslandSettings.compactModeLabel.targetId}>{t(agentIslandSettings.compactModeLabel.titleKey)}</span>}
+                hint={t(agentIslandSettings.compactModeLabel.descriptionKey)}
+              >
+                <div className="relative min-w-0">
+                  <select
+                    data-setting-id={agentIslandSettings.compactModeLabel.id}
+                    value={compactDisplayMode}
+                    disabled={compactModePending}
+                    onChange={(event) => void handleCompactDisplayModeChange(event.target.value as AgentIslandCompactDisplayMode)}
+                    className={cn(
+                      'h-9 w-full min-w-0 appearance-none rounded-full border py-0 pl-3 pr-9 text-12 outline-none',
+                      'bg-[var(--settings-input-bg)] text-[var(--settings-input-text)]',
+                      'border-[var(--settings-input-border)] focus:ring-2 focus:ring-[var(--focus-ring-soft)]',
+                    )}
+                    aria-label={t(agentIslandSettings.compactModeLabel.titleKey)}
+                  >
+                    <option value="standard">{t('settings.agentIsland.compactModeStandard')}</option>
+                    <option value="hidden">{t('settings.agentIsland.compactModeHidden')}</option>
+                  </select>
+                  <ChevronDown
+                    size={15}
+                    className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary-mid)]"
+                    aria-hidden="true"
+                  />
+                </div>
+              </SettingsField>
               <SettingsRow
                 title={<span id={agentIslandSettings.subtleRemindersLabel.targetId}>{t(agentIslandSettings.subtleRemindersLabel.titleKey)}</span>}
                 hint={t(agentIslandSettings.subtleRemindersLabel.descriptionKey)}
